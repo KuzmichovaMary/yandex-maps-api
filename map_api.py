@@ -214,26 +214,34 @@ class Example(QMainWindow, Ui_MainWindow):
         if not toponym:
             print("Nothing found")
             return
-        self.toponym_postal_code = toponym["metaDataProperty"]["GeocoderMetaData"]["Address"]["postal_code"]
-        self.toponym_address = toponym["metaDataProperty"]["GeocoderMetaData"]["text"]
-        ll, spn = get_ll_span(toponym)
-        self.pt.append(f"{ll},comma")
-        self.map_params["pt"] = "~".join(self.pt)
-        if not rspn:
-            self.map_params["ll"] = ll
-            self.map_params["spn"] = spn
-        self.get_image()
-        to_show = self.toponym_address
-        if self.show_index.isChecked():
-            to_show += self.toponym_postal_code
-        self.info.setPlainText(to_show)
+        if toponym["metaDataProperty"]["GeocoderMetaData"]["kind"] == "house":
+            if "postal_code" in toponym["metaDataProperty"]["GeocoderMetaData"]["Address"]:
+                self.toponym_postal_code = toponym["metaDataProperty"]["GeocoderMetaData"]["Address"]["postal_code"]
+            else:
+                self.toponym_postal_code = "No postal code"
+            self.toponym_address = toponym["metaDataProperty"]["GeocoderMetaData"]["text"]
+            ll, spn = get_ll_span(toponym)
+            self.pt.append(f"{ll},comma")
+            self.map_params["pt"] = "~".join(self.pt)
+            if not rspn:
+                self.map_params["ll"] = ll
+                self.map_params["spn"] = spn
+            self.get_image()
+            to_show = self.toponym_address
+            if self.show_index.isChecked():
+                to_show += self.toponym_postal_code
+            self.info.setPlainText(to_show)
 
     def mousePressEvent(self, event):
         if event.button() == Qt.LeftButton:
-            accepted, address = Dialog().exec_()
-            if accepted:
-                self.delete()
-                self.search_address(address, self.map_params["ll"], self.map_params["spn"], 1)
+            p = event.pos()
+            # print(p.x() - 60, p.y() - 60)
+            spn_1, spn_2 = map(float, self.map_params["spn"].split(","))
+            lon, lat = map(float, self.map_params["ll"].split(","))
+            left, top = lon - spn_1, lat + spn_2
+            cur_ll = (left + spn_1 * ((p.x() - 60) / 225), top - spn_2 * ((p.y() - 60) / 225))
+            self.delete()
+            self.search_address(f"{cur_ll[0]},{cur_ll[1]}", rspn=1)
         if event.button() == Qt.RightButton:
             self.delete()
             p = event.pos()
