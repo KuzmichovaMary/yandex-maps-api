@@ -8,5 +8,5 @@
 ## Скриншоты
 
 
-![main_menu](https://github.com/KuzmichovaMary/yandex-maps-api/blob/master/mapsapi.png?raw=true)
+![main_menu](https://github.com/KuzmichovaMary/yandex-maps-api/blob/release/1.1.0/mapsapi.png?raw=true)
 
